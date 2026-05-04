@@ -1,0 +1,30 @@
+# Stocks selected by nse-stock-picker.
+# One symbol per line.
+
+
+
+
+
+
+
+ABB
+ADANIPORTS
+BEL
+BOSCHLTD
+CUMMINSIND
+DIXON
+DLF
+DMART
+ETERNAL
+HAL
+HINDALCO
+INDHOTEL
+INDIGO
+LT
+MANAPPURAM
+MARUTI
+PAYTM
+PGEL
+SBIN
+SUZLON
+TRENT

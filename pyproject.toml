@@ -1,0 +1,23 @@
+[project]
+name = "nse-puller"
+version = "0.1.0"
+description = "Pull NSE quote data for a custom stock list"
+requires-python = ">=3.10"
+dependencies = [
+  "questionary>=2.1.0",
+  "requests>=2.32.0",
+  "torch>=2.3.0",
+  "transformers>=4.41.0",
+]
+
+[project.scripts]
+nse-puller = "nse_puller:run"
+nse-stock-picker = "nse_stock_picker:run"
+nse-sentiment = "nse_sentiment:run"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["nse_puller", "nse_stock_picker", "nse_sentiment"]

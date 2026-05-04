@@ -1,0 +1,137 @@
+# NSE Puller
+
+Fetch daily NSE historical equity data for the stock symbols you choose.
+
+## Setup
+
+```bash
+cd /home/pi/projects/nse-puller
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -e .
+```
+
+## Stock Picker
+
+Use the separate interactive picker app to edit `stocks.txt` with a fuzzy checklist UI:
+
+```bash
+nse-stock-picker
+```
+
+Useful options:
+
+```bash
+nse-stock-picker --page-size 30
+nse-stock-picker --refresh-symbol-list
+nse-stock-picker --stocks-file /tmp/my-stocks.txt
+```
+
+How it works:
+
+- It downloads and caches the NSE symbol universe from `EQUITY_L.csv`.
+- It fuzzy-matches by symbol and company name.
+- It saves the selected symbols back into `stocks.txt` or the file you pass with `--stocks-file`.
+- `nse-puller` then uses that `stocks.txt` by default when you run it with no symbols.
+- If `stocks.txt` is missing or empty and `nse-puller` is running in a real terminal, it auto-launches the picker for you.
+
+## Usage
+
+Update one CSV per stock under `out/stocks/`:
+
+```bash
+nse-puller RELIANCE TCS INFY
+```
+
+Update from the project `stocks.txt` file:
+
+```bash
+nse-puller
+```
+
+Write a combined CSV instead of per-stock files:
+
+```bash
+nse-puller --symbols-file stocks.txt --output history.csv
+```
+
+Pick a custom date range:
+
+```bash
+nse-puller RELIANCE TCS --start-date 2015-01-01 --end-date 2020-12-31 --output history.csv
+```
+
+Run more gently against NSE:
+
+```bash
+nse-puller --symbols-file stocks.txt --out-dir out --workers 1 --requests-per-second 1.5
+```
+
+Write JSON or a small table output:
+
+```bash
+nse-puller --symbols-file stocks.txt --format json --output history.json
+nse-puller RELIANCE --start-date 2024-01-01 --end-date 2024-01-10 --format table
+```
+
+Run the daily updater manually:
+
+```bash
+./scripts/daily_update.sh
+```
+
+Build incremental sentiment history from old stock dates through the latest trading day:
+
+```bash
+nse-sentiment
+```
+
+Useful options:
+
+```bash
+nse-sentiment SBIN LT
+nse-sentiment --symbols-file stocks.txt --refresh-days 5
+nse-sentiment --start-date 2024-01-01 --end-date 2024-12-31
+```
+
+Install the weekday cron job:
+
+```bash
+./scripts/install_cron.sh
+```
+
+## Output Layout
+
+```text
+out/
+  logs/
+    latest.log
+    run-YYYYMMDD-HHMMSS.log
+    cron.log
+  progress.json
+  sentiments/
+    SBIN.csv
+    LT.csv
+    combined.csv
+  stocks/
+    RELIANCE.csv
+    TCS.csv
+    INFY.csv
+```
+
+## Notes
+
+- Default range is `2008-01-01` through today.
+- Default CSV mode writes one file per stock under `out/stocks/` and resumes from the last saved date in each file.
+- Output columns include `symbol`, `date`, `open`, `high`, `low`, `close`, `volume`, and related daily fields.
+- `nse-sentiment` writes one daily file per stock under `out/sentiments/<SYMBOL>.csv` and rebuilds `out/sentiments/combined.csv` after each run.
+- Sentiment rows are numeric and incremental. Missing-news trading days are written as `0`.
+- Weekend and holiday news is assigned to the next available trading day.
+- Sentiment output columns are `symbol`, `date`, `sentiment_score`, `headline_count`, `source_count`, `market_event`, and `impact_score`.
+- Hidden per-symbol article ledgers are also written under `out/sentiments/` so reruns can refresh the recent tail without losing older deduplicated article history.
+- `out/progress.json` is updated while a long run is in progress so you can see the last completed trading day.
+- `out/logs/latest.log` contains the latest run log, and timestamped logs are kept for older runs.
+- The script caches downloaded bhavcopy zip files under `.cache/bhavcopy/` so reruns do not download the same dates again.
+- Requests are globally throttled by default to reduce the chance of rate limiting, and transient `403`/`429`/`5xx` responses are retried with backoff.
+- Some old or renamed stocks may not have continuous history under a single symbol.
+- Historical news coverage is sourced from GDELT plus recent Google News RSS and Bing News RSS fills, then scored with FinBERT.
