@@ -2,12 +2,27 @@
 
 Fetch daily NSE historical equity data for the stock symbols you choose.
 
+## Quick Start
+
+```bash
+git clone https://github.com/pragundamani/nse-puller.git
+cd nse-puller
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -e .
+nse-stock-picker
+nse-puller
+```
+
 ## Setup
 
 ```bash
-cd /home/pi/projects/nse-puller
+git clone https://github.com/pragundamani/nse-puller.git
+cd nse-puller
 python3 -m venv .venv
 . .venv/bin/activate
+python -m pip install --upgrade pip
 pip install -e .
 ```
 
