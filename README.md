@@ -13,6 +13,7 @@ python -m pip install --upgrade pip
 pip install -e .
 nse-stock-picker
 nse-puller
+nse-minute-data --help
 ```
 
 ## Setup
@@ -108,6 +109,32 @@ nse-sentiment SBIN LT
 nse-sentiment --symbols-file stocks.txt --refresh-days 5
 nse-sentiment --start-date 2024-01-01 --end-date 2024-12-31
 ```
+
+## Minute Data
+
+Use the separate Kite-backed script for minute and other intraday intervals:
+
+```bash
+export KITE_API_KEY=your_api_key
+export KITE_ACCESS_TOKEN=your_access_token
+
+nse-minute-data RELIANCE --from "2026-05-15 09:15:00" --to "2026-05-15 15:30:00"
+```
+
+Useful options:
+
+```bash
+nse-minute-data --symbols-file stocks.txt --from "2026-05-15 09:15:00" --to "2026-05-15 09:30:00"
+nse-minute-data RELIANCE --interval 5minute --from 2026-05-01 --to "2026-05-02 15:30:00" --output reliance-5m.csv
+nse-minute-data INFY --from "2026-05-15 09:15:00" --to "2026-05-15 09:20:00" --format json --output infy.json
+```
+
+Notes:
+
+- `nse-minute-data` uses Zerodha Kite historical candles, not the NSE bhavcopy archive.
+- It resolves NSE symbols through Kite's instruments API and caches the NSE instrument list under `.cache/kite/instruments/NSE.csv`.
+- Default CSV mode writes one file per symbol under `out/minute-data/`.
+- Kite credentials can be passed with `--api-key` and `--access-token`, or through `KITE_API_KEY` and `KITE_ACCESS_TOKEN`.
 
 Install the weekday cron job:
 

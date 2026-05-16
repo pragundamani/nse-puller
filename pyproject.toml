@@ -14,10 +14,11 @@ dependencies = [
 nse-puller = "nse_puller:run"
 nse-stock-picker = "nse_stock_picker:run"
 nse-sentiment = "nse_sentiment:run"
+nse-minute-data = "nse_minute_data:run"
 
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-py-modules = ["nse_puller", "nse_stock_picker", "nse_sentiment"]
+py-modules = ["nse_puller", "nse_stock_picker", "nse_sentiment", "nse_minute_data"]
