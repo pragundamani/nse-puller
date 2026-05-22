@@ -13,6 +13,7 @@ python -m pip install --upgrade pip
 pip install -e .
 nse-stock-picker
 nse-puller
+bse-puller --help
 nse-minute-data --help
 ```
 
@@ -90,6 +91,19 @@ nse-puller --symbols-file stocks.txt --format json --output history.json
 nse-puller RELIANCE --start-date 2024-01-01 --end-date 2024-01-10 --format table
 ```
 
+Pull matching BSE history for the shared stock list:
+
+```bash
+bse-puller
+```
+
+Useful options:
+
+```bash
+bse-puller ABB SBIN --start-date 2024-01-01 --end-date 2024-01-31
+bse-puller --symbols-file stocks.txt --mappings-file bse-stocks.txt --output bse-history.csv
+```
+
 Run the daily updater manually:
 
 ```bash
@@ -136,6 +150,22 @@ Notes:
 - Default CSV mode writes one file per symbol under `out/minute-data/`.
 - Kite credentials can be passed with `--api-key` and `--access-token`, or through `KITE_API_KEY` and `KITE_ACCESS_TOKEN`.
 
+## BSE Daily Data
+
+Use the separate BSE daily-history script with the same shared stock universe from `stocks.txt`:
+
+```bash
+bse-puller
+```
+
+Notes:
+
+- `bse-puller` reads shared symbols from `stocks.txt` by default.
+- It resolves those shared symbols through `bse-stocks.txt`, which maps each symbol to a BSE scrip code.
+- Default CSV mode writes one file per symbol under `out/bse-stocks/`.
+- BSE rows are normalized to the same output header order as `nse-puller`.
+- BSE daily bhavcopy ZIP files are cached under `.cache/bse-bhavcopy/`.
+
 Install the weekday cron job:
 
 ```bash
@@ -151,10 +181,14 @@ out/
     run-YYYYMMDD-HHMMSS.log
     cron.log
   progress.json
+  bse-progress.json
   sentiments/
     SBIN.csv
     LT.csv
     combined.csv
+  bse-stocks/
+    ABB.csv
+    SBIN.csv
   stocks/
     RELIANCE.csv
     TCS.csv
@@ -165,6 +199,7 @@ out/
 
 - Default range is `2008-01-01` through today.
 - Default CSV mode writes one file per stock under `out/stocks/` and resumes from the last saved date in each file.
+- `bse-puller` writes one file per stock under `out/bse-stocks/` and tracks its run state in `out/bse-progress.json`.
 - Output columns include `symbol`, `date`, `open`, `high`, `low`, `close`, `volume`, and related daily fields.
 - `nse-sentiment` writes one daily file per stock under `out/sentiments/<SYMBOL>.csv` and rebuilds `out/sentiments/combined.csv` after each run.
 - Sentiment rows are numeric and incremental. Missing-news trading days are written as `0`.
