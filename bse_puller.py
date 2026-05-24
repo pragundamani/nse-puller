@@ -6,6 +6,7 @@ import argparse
 import csv
 import io
 import sys
+import time
 import zipfile
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -31,7 +32,7 @@ DEFAULT_OUT_DIR = PROJECT_DIR / "out"
 DEFAULT_BSE_MAPPINGS_FILE = PROJECT_DIR / "bse-stocks.txt"
 BSE_CACHE_DIR = PROJECT_DIR / ".cache" / "bse-bhavcopy"
 BSE_ARCHIVE_BASE_URL = "https://www.bseindia.com/download/BhavCopy/Equity"
-DEFAULT_START_DATE = date(2008, 1, 1)
+DEFAULT_START_DATE = date(2016, 12, 8)
 
 
 class BSEArchiveClient:
@@ -69,26 +70,44 @@ class BSEArchiveClient:
             shared_symbol = symbol_map.get(code)
             if shared_symbol is None:
                 continue
-            matched_rows.append(normalize_bse_row(shared_symbol, raw_row))
+            matched_rows.append(normalize_bse_row(shared_symbol, raw_row, day))
         return matched_rows
 
     def get_archive(self, day: date) -> bytes | None:
         cache_path = self.cache_path(day)
         if cache_path.exists():
-            return cache_path.read_bytes()
+            cached_bytes = cache_path.read_bytes()
+            if is_zip_payload(cached_bytes):
+                return cached_bytes
+            cache_path.unlink()
+            return None
 
-        response = requests.get(
-            build_archive_url(day),
-            headers=DEFAULT_HEADERS,
-            timeout=self.timeout,
-        )
+        response = self.request_url(build_archive_url(day))
         if response.status_code == 404:
             return None
         response.raise_for_status()
+        if not is_zip_payload(response.content):
+            return None
 
         cache_path.parent.mkdir(parents=True, exist_ok=True)
         cache_path.write_bytes(response.content)
         return response.content
+
+    def request_url(self, url: str) -> requests.Response:
+        last_response: requests.Response | None = None
+
+        for attempt in range(4):
+            response = requests.get(url, headers=DEFAULT_HEADERS, timeout=self.timeout)
+            last_response = response
+
+            if response.status_code not in {403, 429, 500, 502, 503, 504}:
+                return response
+
+            if attempt < 3:
+                time.sleep(1.5 * (attempt + 1))
+
+        assert last_response is not None
+        return last_response
 
     def cache_path(self, day: date) -> Path:
         month = day.strftime("%b").upper()
@@ -101,11 +120,21 @@ def build_archive_url(day: date) -> str:
     return f"{BSE_ARCHIVE_BASE_URL}/{filename}"
 
 
-def normalize_bse_row(shared_symbol: str, raw_row: dict[str, str]) -> dict[str, str]:
+def is_zip_payload(payload: bytes) -> bool:
+    try:
+        with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+            archive.namelist()
+        return True
+    except zipfile.BadZipFile:
+        return False
+
+
+def normalize_bse_row(shared_symbol: str, raw_row: dict[str, str], trading_day: date) -> dict[str, str]:
+    trading_date = normalize_bse_date(raw_row.get("TRADING_DATE", "")) or trading_day.isoformat()
     return {
         "symbol": shared_symbol,
         "series": (raw_row.get("SC_TYPE") or "").strip(),
-        "date": normalize_bse_date(raw_row.get("TRADING_DATE", "")),
+        "date": trading_date,
         "open": (raw_row.get("OPEN") or "").strip(),
         "high": (raw_row.get("HIGH") or "").strip(),
         "low": (raw_row.get("LOW") or "").strip(),
@@ -306,7 +335,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--start-date",
         type=parse_date,
         default=DEFAULT_START_DATE,
-        help="Start date in YYYY-MM-DD format (default: 2008-01-01)",
+        help="Start date in YYYY-MM-DD format (default: 2016-12-08)",
     )
     parser.add_argument(
         "--end-date",
@@ -393,7 +422,7 @@ def run() -> int:
                 resume=args.resume,
                 log_every=args.log_every,
             )
-        except requests.RequestException as exc:
+        except (requests.RequestException, RuntimeError) as exc:
             print(f"Failed to download BSE archive data: {exc}", file=sys.stderr)
             return 1
         return 0
@@ -404,7 +433,7 @@ def run() -> int:
             start_date=args.start_date,
             end_date=args.end_date,
         )
-    except requests.RequestException as exc:
+    except (requests.RequestException, RuntimeError) as exc:
         print(f"Failed to download BSE archive data: {exc}", file=sys.stderr)
         return 1
 

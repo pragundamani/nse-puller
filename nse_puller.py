@@ -135,10 +135,18 @@ class NSEArchiveClient:
 
     def request_url(self, url: str) -> requests.Response:
         last_response: requests.Response | None = None
+        last_error: requests.RequestException | None = None
 
         for attempt in range(4):
             self.rate_limiter.wait()
-            response = requests.get(url, headers=DEFAULT_HEADERS, timeout=self.timeout)
+            try:
+                response = requests.get(url, headers=DEFAULT_HEADERS, timeout=self.timeout)
+            except requests.RequestException as exc:
+                last_error = exc
+                if attempt < 3:
+                    time.sleep(1.5 * (attempt + 1))
+                    continue
+                raise
             last_response = response
 
             if response.status_code not in {403, 429, 500, 502, 503, 504}:
@@ -147,6 +155,8 @@ class NSEArchiveClient:
             if attempt < 3:
                 time.sleep(1.5 * (attempt + 1))
 
+        if last_error is not None:
+            raise last_error
         assert last_response is not None
         return last_response
 
