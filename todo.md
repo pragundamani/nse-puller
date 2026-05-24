@@ -19,7 +19,18 @@
  - [ ] exponential moving average
   - [ ] double or triple crossovers
   - [ ] adaptive moving average with volatility
-- [ ] market momentum
+- [ ] market momentum $M=V-V^x$ where V is closing price and V^x is closing price x days ago
+- [ ] Relative strength Index
+- [ ] Stochastics KD 
+- [ ] Larry Williams %R
+- [ ] MACD
+- [ ] ADX
+- [ ] VVAP
+- [ ] 
+
+## Calculate
+- [ ] Cyclic waves
+  - [ ] Summation, Harmonic, Synchronicity, Proportionality
 
 # NOTE
 ## General
