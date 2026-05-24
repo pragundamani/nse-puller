@@ -17,6 +17,7 @@
  - [ ] Put/Call Ratios
  - [ ] trend of volume (increase/decrease in volumes) use OBV for volume pressure
  - [ ] exponential moving average
+  - [ ] with multiple items like 10day and 50 day
 
 # > [!NOTE]
 ## Futures
