@@ -17,10 +17,14 @@
  - [ ] Put/Call Ratios
  - [ ] trend of volume (increase/decrease in volumes) use OBV for volume pressure
  - [ ] exponential moving average
-  - [ ] with multiple items like 10day and 50 day
+  - [ ] double or triple crossovers
+  - [ ] adaptive moving average with volatility
+- [ ] market momentum
 
 # NOTE
+## General
+- Bollinger bands targets
 ## Futures
 - sudden decline in open interest warns of a change in trend
 - very high open interest can intensify downward pressure
--
+- 4 week rule
