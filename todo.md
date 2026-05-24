@@ -19,7 +19,7 @@
  - [ ] exponential moving average
   - [ ] with multiple items like 10day and 50 day
 
-# > [!NOTE]
+# NOTE
 ## Futures
 - sudden decline in open interest warns of a change in trend
 - very high open interest can intensify downward pressure
