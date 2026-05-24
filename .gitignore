@@ -5,6 +5,4 @@ __pycache__/
 .cache/
 nse_puller.egg-info/
 
-out/
-
 .kite.env
