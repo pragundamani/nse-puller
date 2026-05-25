@@ -1,0 +1,8 @@
+usage: nse-puller [-h] [--symbols-file SYMBOLS_FILE] [--start-date START_DATE]
+                  [--end-date END_DATE] [--series SERIES] [--workers WORKERS]
+                  [--requests-per-second REQUESTS_PER_SECOND]
+                  [--format {table,json,csv}] [--output OUTPUT]
+                  [--out-dir OUT_DIR] [--resume | --no-resume]
+                  [--log-every LOG_EVERY] [--timeout TIMEOUT]
+                  [symbols ...]
+nse-puller: error: no symbols found in /home/pi/projects/nse-puller/stocks.txt; run nse-stock-picker to populate it

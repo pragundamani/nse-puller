@@ -1,0 +1,25 @@
+[2026-05-02 12:07:37] ABB: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:37] ADANIPORTS: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:37] BEL: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:37] BOSCHLTD: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:37] CUMMINSIND: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:37] DIXON: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:37] DLF: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:37] DMART: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:37] ETERNAL: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:37] HAL: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:37] HINDALCO: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:37] INDHOTEL: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:37] INDIGO: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:37] LT: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:37] MANAPPURAM: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:37] MARUTI: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:37] PAYTM: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:38] PGEL: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:38] SBIN: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:38] SUZLON: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:38] TRENT: existing output found, resuming after 2026-04-22
+[2026-05-02 12:07:38] Starting update for 21 symbols into /home/paragon/proj/nse-puller/out
+[2026-05-02 12:07:40] Processed 1/7 trading days through 2026-04-23
+[2026-05-02 12:07:48] Processed 7/7 trading days through 2026-05-01
+[2026-05-02 12:07:48] Finished update with 126 rows written

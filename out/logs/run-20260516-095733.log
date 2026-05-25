@@ -1,0 +1,58 @@
+[2026-05-16 09:57:33] ABB: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] ADANIPORTS: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] BEL: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] BOSCHLTD: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] CUMMINSIND: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] DIXON: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] DLF: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] DMART: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] ETERNAL: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] HAL: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] HINDALCO: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] INDHOTEL: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] INDIGO: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] LT: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] MANAPPURAM: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] MARUTI: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] PAYTM: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] PGEL: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] SBIN: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] SUZLON: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] TRENT: existing output found, resuming after 2026-04-30
+[2026-05-16 09:57:33] Starting update for 22 symbols into /home/paragon/proj/nse-puller/out
+[2026-05-16 09:57:33] Processed 1/4794 trading days through 2008-01-01
+[2026-05-16 09:57:46] Processed 50/4794 trading days through 2008-03-10
+[2026-05-16 09:59:03] Processed 100/4794 trading days through 2008-05-19
+[2026-05-16 09:59:03] Processed 150/4794 trading days through 2008-07-28
+[2026-05-16 09:59:40] Processed 200/4794 trading days through 2008-10-06
+[2026-05-16 10:00:42] Processed 250/4794 trading days through 2008-12-15
+[2026-05-16 10:01:33] Processed 300/4794 trading days through 2009-02-23
+[2026-05-16 10:03:14] Processed 350/4794 trading days through 2009-05-04
+[2026-05-16 10:03:14] Processed 400/4794 trading days through 2009-07-13
+[2026-05-16 10:03:26] Processed 450/4794 trading days through 2009-09-21
+[2026-05-16 10:04:27] Processed 500/4794 trading days through 2009-11-30
+[2026-05-16 10:05:13] Processed 550/4794 trading days through 2010-02-08
+[2026-05-16 10:06:12] Processed 600/4794 trading days through 2010-04-19
+[2026-05-16 10:06:12] Processed 650/4794 trading days through 2010-06-28
+[2026-05-16 10:06:13] Processed 700/4794 trading days through 2010-09-06
+[2026-05-16 10:06:24] Processed 750/4794 trading days through 2010-11-15
+[2026-05-16 10:06:47] Processed 800/4794 trading days through 2011-01-24
+[2026-05-16 10:07:10] Processed 850/4794 trading days through 2011-04-04
+[2026-05-16 10:07:45] Processed 900/4794 trading days through 2011-06-13
+[2026-05-16 10:07:56] Processed 950/4794 trading days through 2011-08-22
+[2026-05-16 10:08:42] Processed 1000/4794 trading days through 2011-10-31
+[2026-05-16 10:09:17] Processed 1050/4794 trading days through 2012-01-09
+[2026-05-16 10:09:52] Processed 1100/4794 trading days through 2012-03-19
+[2026-05-16 10:10:27] Processed 1150/4794 trading days through 2012-05-28
+[2026-05-16 10:10:28] Processed 1200/4794 trading days through 2012-08-06
+[2026-05-16 10:11:14] Processed 1250/4794 trading days through 2012-10-15
+[2026-05-16 10:11:49] Processed 1300/4794 trading days through 2012-12-24
+[2026-05-16 10:12:01] Processed 1350/4794 trading days through 2013-03-04
+[2026-05-16 10:12:59] Processed 1400/4794 trading days through 2013-05-13
+[2026-05-16 10:12:59] Processed 1450/4794 trading days through 2013-07-22
+[2026-05-16 10:13:35] Processed 1500/4794 trading days through 2013-09-30
+[2026-05-16 10:14:21] Processed 1550/4794 trading days through 2013-12-09
+[2026-05-16 10:14:32] Processed 1600/4794 trading days through 2014-02-17
+[2026-05-16 10:15:39] Processed 1650/4794 trading days through 2014-04-28
+[2026-05-16 10:15:51] Processed 1700/4794 trading days through 2014-07-07
+[2026-05-16 10:16:25] Processed 1750/4794 trading days through 2014-09-15

@@ -1,0 +1,41 @@
+{
+  "status": "running",
+  "started_at": "2026-05-24T22:25:18.572935",
+  "updated_at": "2026-05-24T23:08:07.830200",
+  "requested_start_date": "2008-01-01",
+  "requested_end_date": "2026-05-24",
+  "symbols": [
+    "ABB",
+    "ADANIPORTS",
+    "BEL",
+    "BOSCHLTD",
+    "CUMMINSIND",
+    "DIXON",
+    "DLF",
+    "DMART",
+    "ETERNAL",
+    "HAL",
+    "HINDALCO",
+    "INDHOTEL",
+    "INDIGO",
+    "LENSKART",
+    "LT",
+    "MANAPPURAM",
+    "MARUTI",
+    "PAYTM",
+    "PGEL",
+    "SBIN",
+    "SUZLON",
+    "TRENT"
+  ],
+  "days_processed": 2392,
+  "days_total": 4799,
+  "last_processed_day": "2017-03-01",
+  "totals": {
+    "bhavcopy_rows": 11171,
+    "delivery_days_written": 725,
+    "volatility_days_written": 725,
+    "full_days_written": 0,
+    "market_activity_days_written": 725
+  }
+}

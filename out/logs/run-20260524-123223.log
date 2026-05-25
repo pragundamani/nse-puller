@@ -1,0 +1,31 @@
+[2026-05-24 12:32:23] ABB: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] ADANIPORTS: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] BEL: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] BOSCHLTD: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] CUMMINSIND: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] DIXON: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] DLF: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] DMART: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] ETERNAL: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] HAL: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] HINDALCO: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] INDHOTEL: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] INDIGO: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] LT: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] MANAPPURAM: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] MARUTI: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] PAYTM: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] PGEL: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] SBIN: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] SUZLON: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] TRENT: existing output found, resuming after 2024-01-29
+[2026-05-24 12:32:23] Starting BSE update for 22 symbols into /home/paragon/proj/nse-puller/out
+[2026-05-24 12:32:23] Processed 1/4799 trading days through 2008-01-01
+[2026-05-24 12:32:48] Processed 50/4799 trading days through 2008-03-10
+[2026-05-24 12:33:16] Processed 100/4799 trading days through 2008-05-19
+[2026-05-24 12:33:42] Processed 150/4799 trading days through 2008-07-28
+[2026-05-24 12:34:08] Processed 200/4799 trading days through 2008-10-06
+[2026-05-24 12:34:30] Processed 250/4799 trading days through 2008-12-15
+[2026-05-24 12:34:47] Processed 300/4799 trading days through 2009-02-23
+[2026-05-24 12:35:04] Processed 350/4799 trading days through 2009-05-04
+[2026-05-24 12:35:23] Processed 400/4799 trading days through 2009-07-13
