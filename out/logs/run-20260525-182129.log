@@ -1,0 +1,99 @@
+[2026-05-25 18:21:29] Starting NSE source pull for 22 symbols into /home/paragon/proj/nse-puller/out
+[2026-05-25 18:21:29] Skipped 2008-01-01: all sources already handled (1/4800)
+[2026-05-25 18:21:29] Skipped 2008-03-10: all sources already handled (50/4800)
+[2026-05-25 18:21:29] Skipped 2008-05-19: all sources already handled (100/4800)
+[2026-05-25 18:21:29] Skipped 2008-07-28: all sources already handled (150/4800)
+[2026-05-25 18:21:29] Skipped 2008-10-06: all sources already handled (200/4800)
+[2026-05-25 18:21:29] Skipped 2008-12-15: all sources already handled (250/4800)
+[2026-05-25 18:21:45] Processed 300/4800 trading days through 2009-02-23
+[2026-05-25 18:23:36] Skipped 2009-05-04: all sources already handled (350/4800)
+[2026-05-25 18:23:36] Skipped 2009-07-13: all sources already handled (400/4800)
+[2026-05-25 18:23:49] Processed 450/4800 trading days through 2009-09-21
+[2026-05-25 18:24:58] Skipped 2009-11-30: all sources already handled (500/4800)
+[2026-05-25 18:25:59] Skipped 2010-02-08: all sources already handled (550/4800)
+[2026-05-25 18:27:19] Skipped 2010-04-19: all sources already handled (600/4800)
+[2026-05-25 18:27:19] Skipped 2010-06-28: all sources already handled (650/4800)
+[2026-05-25 18:27:19] Skipped 2010-09-06: all sources already handled (700/4800)
+[2026-05-25 18:27:31] Skipped 2010-11-15: all sources already handled (750/4800)
+[2026-05-25 18:27:58] Skipped 2011-01-24: all sources already handled (800/4800)
+[2026-05-25 18:28:25] Skipped 2011-04-04: all sources already handled (850/4800)
+[2026-05-25 18:29:08] Skipped 2011-06-13: all sources already handled (900/4800)
+[2026-05-25 18:29:23] Skipped 2011-08-22: all sources already handled (950/4800)
+[2026-05-25 18:30:25] Skipped 2011-10-31: all sources already handled (1000/4800)
+[2026-05-25 18:31:09] Skipped 2012-01-09: all sources already handled (1050/4800)
+[2026-05-25 18:31:52] Skipped 2012-03-19: all sources already handled (1100/4800)
+[2026-05-25 18:32:34] Skipped 2012-05-28: all sources already handled (1150/4800)
+[2026-05-25 18:32:34] Skipped 2012-08-06: all sources already handled (1200/4800)
+[2026-05-25 18:33:36] Skipped 2012-10-15: all sources already handled (1250/4800)
+[2026-05-25 18:34:18] Skipped 2012-12-24: all sources already handled (1300/4800)
+[2026-05-25 18:34:31] Skipped 2013-03-04: all sources already handled (1350/4800)
+[2026-05-25 18:35:50] Skipped 2013-05-13: all sources already handled (1400/4800)
+[2026-05-25 18:35:50] Skipped 2013-07-22: all sources already handled (1450/4800)
+[2026-05-25 18:36:34] Skipped 2013-09-30: all sources already handled (1500/4800)
+[2026-05-25 18:37:34] Skipped 2013-12-09: all sources already handled (1550/4800)
+[2026-05-25 18:37:53] Skipped 2014-02-17: all sources already handled (1600/4800)
+[2026-05-25 18:39:26] Skipped 2014-04-28: all sources already handled (1650/4800)
+[2026-05-25 18:39:40] Skipped 2014-07-07: all sources already handled (1700/4800)
+[2026-05-25 18:40:28] Skipped 2014-09-15: all sources already handled (1750/4800)
+[2026-05-25 18:42:16] Skipped 2014-11-24: all sources already handled (1800/4800)
+[2026-05-25 18:42:46] Skipped 2015-02-02: all sources already handled (1850/4800)
+[2026-05-25 18:43:52] Skipped 2015-04-13: all sources already handled (1900/4800)
+[2026-05-25 18:44:19] Skipped 2015-06-22: all sources already handled (1950/4800)
+[2026-05-25 18:44:19] Skipped 2015-08-31: all sources already handled (2000/4800)
+[2026-05-25 18:45:19] Skipped 2015-11-09: all sources already handled (2050/4800)
+[2026-05-25 18:46:01] Skipped 2016-01-18: all sources already handled (2100/4800)
+[2026-05-25 18:46:08] Skipped 2016-03-28: all sources already handled (2150/4800)
+[2026-05-25 18:46:14] Skipped 2016-06-06: all sources already handled (2200/4800)
+[2026-05-25 18:46:19] Processed 2250/4800 trading days through 2016-08-15
+[2026-05-25 18:46:27] Skipped 2016-10-24: all sources already handled (2300/4800)
+[2026-05-25 18:46:31] Skipped 2017-01-02: all sources already handled (2350/4800)
+[2026-05-25 18:46:37] Processed 2400/4800 trading days through 2017-03-13
+[2026-05-25 18:46:43] Skipped 2017-05-22: all sources already handled (2450/4800)
+[2026-05-25 18:46:44] Skipped 2017-07-31: all sources already handled (2500/4800)
+[2026-05-25 18:46:49] Skipped 2017-10-09: all sources already handled (2550/4800)
+[2026-05-25 18:46:51] Skipped 2017-12-18: all sources already handled (2600/4800)
+[2026-05-25 18:46:57] Skipped 2018-02-26: all sources already handled (2650/4800)
+[2026-05-25 18:47:05] Skipped 2018-05-07: all sources already handled (2700/4800)
+[2026-05-25 18:47:05] Skipped 2018-07-16: all sources already handled (2750/4800)
+[2026-05-25 18:47:12] Skipped 2018-09-24: all sources already handled (2800/4800)
+[2026-05-25 18:47:19] Skipped 2018-12-03: all sources already handled (2850/4800)
+[2026-05-25 18:47:20] Skipped 2019-02-11: all sources already handled (2900/4800)
+[2026-05-25 18:47:29] Skipped 2019-04-22: all sources already handled (2950/4800)
+[2026-05-25 18:47:36] Skipped 2019-07-01: all sources already handled (3000/4800)
+[2026-05-25 18:47:42] Skipped 2019-09-09: all sources already handled (3050/4800)
+[2026-05-25 18:47:53] Skipped 2019-11-18: all sources already handled (3100/4800)
+[2026-05-25 18:47:55] Skipped 2020-01-27: all sources already handled (3150/4800)
+[2026-05-25 18:48:03] Processed 3200/4800 trading days through 2020-04-06
+[2026-05-25 18:48:13] Skipped 2020-06-15: all sources already handled (3250/4800)
+[2026-05-25 18:48:13] Skipped 2020-08-24: all sources already handled (3300/4800)
+[2026-05-25 18:48:16] Skipped 2020-11-02: all sources already handled (3350/4800)
+[2026-05-25 18:48:21] Skipped 2021-01-11: all sources already handled (3400/4800)
+[2026-05-25 18:48:25] Skipped 2021-03-22: all sources already handled (3450/4800)
+[2026-05-25 18:48:35] Skipped 2021-05-31: all sources already handled (3500/4800)
+[2026-05-25 18:48:37] Skipped 2021-08-09: all sources already handled (3550/4800)
+[2026-05-25 18:48:42] Skipped 2021-10-18: all sources already handled (3600/4800)
+[2026-05-25 18:48:46] Skipped 2021-12-27: all sources already handled (3650/4800)
+[2026-05-25 18:48:51] Skipped 2022-03-07: all sources already handled (3700/4800)
+[2026-05-25 18:48:59] Skipped 2022-05-16: all sources already handled (3750/4800)
+[2026-05-25 18:48:59] Skipped 2022-07-25: all sources already handled (3800/4800)
+[2026-05-25 18:53:13] Processed 3850/4800 trading days through 2022-10-03
+[2026-05-25 18:57:27] Processed 3900/4800 trading days through 2022-12-12
+[2026-05-25 19:03:31] Processed 3950/4800 trading days through 2023-02-20
+[2026-05-25 19:08:34] Processed 4000/4800 trading days through 2023-05-01
+[2026-05-25 19:13:41] Processed 4050/4800 trading days through 2023-07-10
+[2026-05-25 19:18:28] Processed 4100/4800 trading days through 2023-09-18
+[2026-05-25 19:23:36] Processed 4150/4800 trading days through 2023-11-27
+[2026-05-25 19:28:31] Processed 4200/4800 trading days through 2024-02-05
+[2026-05-25 19:33:16] Processed 4250/4800 trading days through 2024-04-15
+[2026-05-25 19:39:09] Processed 4300/4800 trading days through 2024-06-24
+[2026-05-25 19:44:32] Processed 4350/4800 trading days through 2024-09-02
+[2026-05-25 19:50:42] Processed 4400/4800 trading days through 2024-11-11
+[2026-05-25 19:56:35] Processed 4450/4800 trading days through 2025-01-20
+[2026-05-25 20:01:45] Processed 4500/4800 trading days through 2025-03-31
+[2026-05-25 20:06:38] Processed 4550/4800 trading days through 2025-06-09
+[2026-05-25 20:11:38] Processed 4600/4800 trading days through 2025-08-18
+[2026-05-25 20:16:48] Processed 4650/4800 trading days through 2025-10-27
+[2026-05-25 20:19:54] Processed 4700/4800 trading days through 2026-01-05
+[2026-05-25 20:23:49] Processed 4750/4800 trading days through 2026-03-16
+[2026-05-25 20:30:44] Processed 4800/4800 trading days through 2026-05-25
+[2026-05-25 20:30:44] Finished NSE source pull

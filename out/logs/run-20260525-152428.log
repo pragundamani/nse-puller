@@ -1,0 +1,74 @@
+[2026-05-25 15:24:28] ABB: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] ADANIPORTS: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] BEL: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] BOSCHLTD: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] CUMMINSIND: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] DIXON: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] DLF: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] DMART: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] ETERNAL: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] HAL: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] HINDALCO: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] INDHOTEL: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] INDIGO: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] LT: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] MANAPPURAM: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] MARUTI: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] PAYTM: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] PGEL: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] SBIN: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:28] SUZLON: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:29] TRENT: existing output found, resuming after 2024-07-24
+[2026-05-25 15:24:29] Starting BSE update for 22 symbols into /home/paragon/proj/nse-puller/out
+[2026-05-25 15:24:29] Processed 1/2468 trading days through 2016-12-08
+[2026-05-25 15:24:31] Processed 50/2468 trading days through 2017-02-15
+[2026-05-25 15:24:36] Processed 100/2468 trading days through 2017-04-26
+[2026-05-25 15:24:38] Processed 150/2468 trading days through 2017-07-05
+[2026-05-25 15:24:41] Processed 200/2468 trading days through 2017-09-13
+[2026-05-25 15:24:45] Processed 250/2468 trading days through 2017-11-22
+[2026-05-25 15:24:47] Processed 300/2468 trading days through 2018-01-31
+[2026-05-25 15:24:51] Processed 350/2468 trading days through 2018-04-11
+[2026-05-25 15:24:52] Processed 400/2468 trading days through 2018-06-20
+[2026-05-25 15:24:55] Processed 450/2468 trading days through 2018-08-29
+[2026-05-25 15:24:59] Processed 500/2468 trading days through 2018-11-07
+[2026-05-25 15:25:02] Processed 550/2468 trading days through 2019-01-16
+[2026-05-25 15:25:06] Processed 600/2468 trading days through 2019-03-27
+[2026-05-25 15:25:11] Processed 650/2468 trading days through 2019-06-05
+[2026-05-25 15:25:13] Processed 700/2468 trading days through 2019-08-14
+[2026-05-25 15:25:19] Processed 750/2468 trading days through 2019-10-23
+[2026-05-25 15:25:24] Processed 800/2468 trading days through 2020-01-01
+[2026-05-25 15:25:33] Processed 850/2468 trading days through 2020-03-11
+[2026-05-25 15:25:42] Processed 900/2468 trading days through 2020-05-20
+[2026-05-25 15:25:44] Processed 950/2468 trading days through 2020-07-29
+[2026-05-25 15:25:46] Processed 1000/2468 trading days through 2020-10-07
+[2026-05-25 15:25:49] Processed 1050/2468 trading days through 2020-12-16
+[2026-05-25 15:25:52] Processed 1100/2468 trading days through 2021-02-24
+[2026-05-25 15:25:57] Processed 1150/2468 trading days through 2021-05-05
+[2026-05-25 15:25:58] Processed 1200/2468 trading days through 2021-07-14
+[2026-05-25 15:26:01] Processed 1250/2468 trading days through 2021-09-22
+[2026-05-25 15:26:06] Processed 1300/2468 trading days through 2021-12-01
+[2026-05-25 15:26:08] Processed 1350/2468 trading days through 2022-02-09
+[2026-05-25 15:26:13] Processed 1400/2468 trading days through 2022-04-20
+[2026-05-25 15:26:14] Processed 1450/2468 trading days through 2022-06-29
+[2026-05-25 15:26:19] Processed 1500/2468 trading days through 2022-09-07
+[2026-05-25 15:26:23] Processed 1550/2468 trading days through 2022-11-16
+[2026-05-25 15:26:24] Processed 1600/2468 trading days through 2023-01-25
+[2026-05-25 15:26:28] Processed 1650/2468 trading days through 2023-04-05
+[2026-05-25 15:26:32] Processed 1700/2468 trading days through 2023-06-14
+[2026-05-25 15:26:35] Processed 1750/2468 trading days through 2023-08-23
+[2026-05-25 15:26:39] Processed 1800/2468 trading days through 2023-11-01
+[2026-05-25 15:26:43] Processed 1850/2468 trading days through 2024-01-10
+[2026-05-25 15:26:47] Processed 1900/2468 trading days through 2024-03-20
+[2026-05-25 15:26:56] Processed 1950/2468 trading days through 2024-05-29
+[2026-05-25 15:27:13] Processed 2000/2468 trading days through 2024-08-07
+[2026-05-25 15:28:20] Processed 2050/2468 trading days through 2024-10-16
+[2026-05-25 15:29:15] Processed 2100/2468 trading days through 2024-12-25
+[2026-05-25 15:29:47] Processed 2150/2468 trading days through 2025-03-05
+[2026-05-25 15:30:26] Processed 2200/2468 trading days through 2025-05-14
+[2026-05-25 15:31:18] Processed 2250/2468 trading days through 2025-07-23
+[2026-05-25 15:33:00] Processed 2300/2468 trading days through 2025-10-01
+[2026-05-25 15:34:09] Processed 2350/2468 trading days through 2025-12-10
+[2026-05-25 15:34:52] Processed 2400/2468 trading days through 2026-02-18
+[2026-05-25 15:35:34] Processed 2450/2468 trading days through 2026-04-29
+[2026-05-25 15:35:46] Processed 2468/2468 trading days through 2026-05-25
+[2026-05-25 15:35:46] Finished BSE update with 0 rows written

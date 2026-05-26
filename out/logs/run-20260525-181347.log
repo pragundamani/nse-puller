@@ -1,0 +1,18 @@
+[2026-05-25 18:13:47] Starting NSE source pull for 22 symbols into /home/paragon/proj/nse-puller/out
+[2026-05-25 18:13:47] Skipped 2008-01-01: all sources already handled (1/284)
+[2026-05-25 18:13:47] Skipped 2008-01-28: all sources already handled (20/284)
+[2026-05-25 18:13:47] Skipped 2008-02-25: all sources already handled (40/284)
+[2026-05-25 18:13:47] Skipped 2008-03-24: all sources already handled (60/284)
+[2026-05-25 18:13:47] Skipped 2008-04-21: all sources already handled (80/284)
+[2026-05-25 18:13:47] Skipped 2008-05-19: all sources already handled (100/284)
+[2026-05-25 18:13:47] Skipped 2008-06-16: all sources already handled (120/284)
+[2026-05-25 18:13:47] Skipped 2008-07-14: all sources already handled (140/284)
+[2026-05-25 18:13:47] Skipped 2008-08-11: all sources already handled (160/284)
+[2026-05-25 18:13:47] Skipped 2008-09-08: all sources already handled (180/284)
+[2026-05-25 18:13:47] Skipped 2008-10-06: all sources already handled (200/284)
+[2026-05-25 18:13:47] Skipped 2008-11-03: all sources already handled (220/284)
+[2026-05-25 18:13:47] Skipped 2008-12-01: all sources already handled (240/284)
+[2026-05-25 18:13:47] Skipped 2008-12-29: all sources already handled (260/284)
+[2026-05-25 18:13:47] Skipped 2009-01-26: all sources already handled (280/284)
+[2026-05-25 18:13:47] Skipped 2009-01-30: all sources already handled (284/284)
+[2026-05-25 18:13:47] Finished NSE source pull
