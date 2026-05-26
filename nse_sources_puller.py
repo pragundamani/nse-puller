@@ -8,6 +8,7 @@ import io
 import json
 import sys
 import time
+import zipfile
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
@@ -35,6 +36,7 @@ from nse_puller import (
 DEFAULT_START_DATE = date(2008, 1, 1)
 STATUS_CACHE_DIR = PROJECT_DIR / ".cache" / "nse-sources-status"
 SOURCE_CACHE_DIR = PROJECT_DIR / ".cache" / "nse-sources"
+MAX_PROGRESS_ERRORS = 20
 
 
 @dataclass(frozen=True)
@@ -105,7 +107,7 @@ class RateLimiter:
 
 
 class SourceClient:
-    def __init__(self, timeout: int = 30, requests_per_second: float = 2.0) -> None:
+    def __init__(self, timeout: int = 30, requests_per_second: float = 4.0) -> None:
         self.timeout = timeout
         self.rate_limiter = RateLimiter(requests_per_second)
 
@@ -158,6 +160,34 @@ def write_cached_status(key: str, day: date, payload: dict) -> None:
     cache_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
+def processed_cache_path(source: str, day: date) -> Path:
+    return STATUS_CACHE_DIR / "processed" / source / f"{day.isoformat()}.json"
+
+
+def is_source_processed(source: str, day: date) -> bool:
+    return processed_cache_path(source, day).exists()
+
+
+def mark_source_processed(source: str, day: date, output_path: Path, rows_written: int | None = None) -> None:
+    cache_path = processed_cache_path(source, day)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "status": "processed",
+        "source": source,
+        "date": day.isoformat(),
+        "output_path": str(output_path),
+        "output_exists": output_path.exists(),
+        "checked_at": datetime.now().isoformat(),
+    }
+    if rows_written is not None:
+        payload["rows_written"] = rows_written
+    cache_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+def should_process_source(source: str, day: date, output_path: Path) -> bool:
+    return not output_path.exists() and not is_source_processed(source, day)
+
+
 def fetch_source_bytes(client: SourceClient, spec: ReportSpec, day: date) -> bytes | None:
     source_cache = source_cache_path(spec, day)
     if source_cache.exists():
@@ -201,6 +231,59 @@ def output_market_activity_path(out_dir: Path, day: date) -> Path:
     return out_dir / MARKET_ACTIVITY_SPEC.out_dir / f"{day:%Y}" / f"{day:%m}" / MARKET_ACTIVITY_SPEC.filename(day)
 
 
+def expected_output_paths(out_dir: Path, day: date) -> dict[str, Path]:
+    paths: dict[str, Path] = {}
+
+    if day >= BHAVCOPY_START_DATE:
+        paths["bhavcopy"] = output_day_path(out_dir, "bhavcopy", day)
+    if day >= DELIVERY_SPEC.start_date:
+        paths[DELIVERY_SPEC.key] = output_day_path(out_dir, DELIVERY_SPEC.out_dir, day)
+    if day >= VOLATILITY_SPEC.start_date:
+        paths[VOLATILITY_SPEC.key] = output_day_path(out_dir, VOLATILITY_SPEC.out_dir, day)
+    if day >= FULL_SPEC.start_date:
+        paths[FULL_SPEC.key] = output_day_path(out_dir, FULL_SPEC.out_dir, day)
+    if day >= MARKET_ACTIVITY_SPEC.start_date:
+        paths[MARKET_ACTIVITY_SPEC.key] = output_market_activity_path(out_dir, day)
+
+    return paths
+
+
+def day_outputs_complete(day: date, expected_paths: dict[str, Path]) -> bool:
+    return bool(expected_paths) and all(path.exists() or is_source_processed(source, day) for source, path in expected_paths.items())
+
+
+def record_source_error(
+    logger: RunLogger,
+    progress: dict,
+    source: str,
+    day: date,
+    exc: Exception,
+    url: str | None = None,
+    cache_path: Path | None = None,
+) -> None:
+    error = {
+        "source": source,
+        "date": day.isoformat(),
+        "error_type": type(exc).__name__,
+        "message": str(exc),
+    }
+    if url:
+        error["url"] = url
+    if cache_path:
+        error["cache_path"] = str(cache_path)
+
+    progress["errors_count"] += 1
+    progress["recent_errors"].append(error)
+    del progress["recent_errors"][:-MAX_PROGRESS_ERRORS]
+
+    context = f" source={source} date={day.isoformat()}"
+    if url:
+        context += f" url={url}"
+    if cache_path:
+        context += f" cache={cache_path}"
+    logger.info(f"ERROR{context}: {type(exc).__name__}: {exc}")
+
+
 def parse_delivery_rows(day: date, payload: bytes, symbols: set[str]) -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
     for line in payload.decode("utf-8", errors="replace").splitlines():
@@ -226,7 +309,7 @@ def parse_delivery_rows(day: date, payload: bytes, symbols: set[str]) -> list[di
 
 
 def parse_volatility_rows(payload: bytes, symbols: set[str]) -> list[dict[str, str]]:
-    reader = csv.DictReader(io.StringIO(payload.decode("utf-8", errors="replace")))
+    reader = csv.DictReader(io.StringIO(payload.decode("utf-8", errors="replace"), newline=""))
     rows: list[dict[str, str]] = []
     for raw_row in reader:
         symbol = (raw_row.get("Symbol") or "").strip().upper()
@@ -248,7 +331,7 @@ def parse_volatility_rows(payload: bytes, symbols: set[str]) -> list[dict[str, s
 
 
 def parse_full_rows(payload: bytes, symbols: set[str]) -> list[dict[str, str]]:
-    reader = csv.DictReader(io.StringIO(payload.decode("utf-8", errors="replace")), skipinitialspace=True)
+    reader = csv.DictReader(io.StringIO(payload.decode("utf-8", errors="replace"), newline=""), skipinitialspace=True)
     rows: list[dict[str, str]] = []
     for raw_row in reader:
         symbol = (raw_row.get("SYMBOL") or "").strip().upper()
@@ -330,8 +413,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--requests-per-second",
         type=float,
-        default=2.0,
-        help="Global request throttle across all requests (default: 2.0)",
+        default=4.0,
+        help="Global request throttle across all requests (default: 4.0)",
     )
     parser.add_argument(
         "--timeout",
@@ -399,45 +482,119 @@ def run() -> int:
             "full_days_written": 0,
             "market_activity_days_written": 0,
         },
+        "errors_count": 0,
+        "recent_errors": [],
     }
     write_progress(progress_path, progress)
     logger.info(f"Starting NSE source pull for {len(symbols)} symbols into {out_dir}")
 
     for index, day in enumerate(processing_days, start=1):
-        bhavcopy_output = output_day_path(out_dir, "bhavcopy", day)
-        if day >= BHAVCOPY_START_DATE and not bhavcopy_output.exists():
-            day_rows = bhavcopy_client.fetch_day(day, symbol_set, "EQ")
-            if write_day_csv(bhavcopy_output, day_rows):
-                progress["totals"]["bhavcopy_rows"] += append_bhavcopy_rows(out_dir, day_rows)
+        day_output_paths = expected_output_paths(out_dir, day)
+        if day_outputs_complete(day, day_output_paths):
+            progress["updated_at"] = datetime.now().isoformat()
+            progress["days_processed"] = index
+            progress["last_processed_day"] = day.isoformat()
+            write_progress(progress_path, progress)
 
-        delivery_output = output_day_path(out_dir, DELIVERY_SPEC.out_dir, day)
-        if day >= DELIVERY_SPEC.start_date and not delivery_output.exists():
-            delivery_payload = fetch_source_bytes(source_client, DELIVERY_SPEC, day)
-            delivery_rows = parse_delivery_rows(day, delivery_payload, symbol_set) if delivery_payload else []
-            if write_day_csv(delivery_output, delivery_rows):
-                progress["totals"]["delivery_days_written"] += 1
+            if index == 1 or index == len(processing_days) or index % args.log_every == 0:
+                logger.info(
+                    f"Skipped {day.isoformat()}: all sources already handled ({index}/{len(processing_days)})"
+                )
+            continue
 
-        volatility_output = output_day_path(out_dir, VOLATILITY_SPEC.out_dir, day)
-        if day >= VOLATILITY_SPEC.start_date and not volatility_output.exists():
-            volatility_payload = fetch_source_bytes(source_client, VOLATILITY_SPEC, day)
-            volatility_rows = parse_volatility_rows(volatility_payload, symbol_set) if volatility_payload else []
-            if write_day_csv(volatility_output, volatility_rows):
-                progress["totals"]["volatility_days_written"] += 1
+        bhavcopy_output = day_output_paths.get("bhavcopy") or output_day_path(out_dir, "bhavcopy", day)
+        if day >= BHAVCOPY_START_DATE and should_process_source("bhavcopy", day, bhavcopy_output):
+            try:
+                day_rows = bhavcopy_client.fetch_day(day, symbol_set, "EQ")
+                if write_day_csv(bhavcopy_output, day_rows):
+                    progress["totals"]["bhavcopy_rows"] += append_bhavcopy_rows(out_dir, day_rows)
+                mark_source_processed("bhavcopy", day, bhavcopy_output, len(day_rows))
+            except (OSError, ValueError, csv.Error, requests.RequestException, zipfile.BadZipFile) as exc:
+                record_source_error(logger, progress, "bhavcopy", day, exc, cache_path=bhavcopy_client.cache_path(day))
 
-        full_output = output_day_path(out_dir, FULL_SPEC.out_dir, day)
-        if day >= FULL_SPEC.start_date and not full_output.exists():
-            full_payload = fetch_source_bytes(source_client, FULL_SPEC, day)
-            full_rows = parse_full_rows(full_payload, symbol_set) if full_payload else []
-            if write_day_csv(full_output, full_rows):
-                progress["totals"]["full_days_written"] += 1
+        delivery_output = day_output_paths.get(DELIVERY_SPEC.key) or output_day_path(out_dir, DELIVERY_SPEC.out_dir, day)
+        if day >= DELIVERY_SPEC.start_date and should_process_source(DELIVERY_SPEC.key, day, delivery_output):
+            try:
+                delivery_payload = fetch_source_bytes(source_client, DELIVERY_SPEC, day)
+                delivery_rows = parse_delivery_rows(day, delivery_payload, symbol_set) if delivery_payload else []
+                if write_day_csv(delivery_output, delivery_rows):
+                    progress["totals"]["delivery_days_written"] += 1
+                mark_source_processed(DELIVERY_SPEC.key, day, delivery_output, len(delivery_rows))
+            except (OSError, ValueError, csv.Error, requests.RequestException) as exc:
+                record_source_error(
+                    logger,
+                    progress,
+                    DELIVERY_SPEC.key,
+                    day,
+                    exc,
+                    url=DELIVERY_SPEC.url(day),
+                    cache_path=source_cache_path(DELIVERY_SPEC, day),
+                )
 
-        market_activity_output = output_market_activity_path(out_dir, day)
-        if day >= MARKET_ACTIVITY_SPEC.start_date and not market_activity_output.exists():
-            market_activity_payload = fetch_source_bytes(source_client, MARKET_ACTIVITY_SPEC, day)
-            if market_activity_payload:
-                market_activity_output.parent.mkdir(parents=True, exist_ok=True)
-                market_activity_output.write_bytes(market_activity_payload)
-                progress["totals"]["market_activity_days_written"] += 1
+        volatility_output = day_output_paths.get(VOLATILITY_SPEC.key) or output_day_path(out_dir, VOLATILITY_SPEC.out_dir, day)
+        if day >= VOLATILITY_SPEC.start_date and should_process_source(VOLATILITY_SPEC.key, day, volatility_output):
+            try:
+                volatility_payload = fetch_source_bytes(source_client, VOLATILITY_SPEC, day)
+                volatility_rows = parse_volatility_rows(volatility_payload, symbol_set) if volatility_payload else []
+                if write_day_csv(volatility_output, volatility_rows):
+                    progress["totals"]["volatility_days_written"] += 1
+                mark_source_processed(VOLATILITY_SPEC.key, day, volatility_output, len(volatility_rows))
+            except (OSError, ValueError, csv.Error, requests.RequestException) as exc:
+                record_source_error(
+                    logger,
+                    progress,
+                    VOLATILITY_SPEC.key,
+                    day,
+                    exc,
+                    url=VOLATILITY_SPEC.url(day),
+                    cache_path=source_cache_path(VOLATILITY_SPEC, day),
+                )
+
+        full_output = day_output_paths.get(FULL_SPEC.key) or output_day_path(out_dir, FULL_SPEC.out_dir, day)
+        if day >= FULL_SPEC.start_date and should_process_source(FULL_SPEC.key, day, full_output):
+            try:
+                full_payload = fetch_source_bytes(source_client, FULL_SPEC, day)
+                full_rows = parse_full_rows(full_payload, symbol_set) if full_payload else []
+                if write_day_csv(full_output, full_rows):
+                    progress["totals"]["full_days_written"] += 1
+                mark_source_processed(FULL_SPEC.key, day, full_output, len(full_rows))
+            except (OSError, ValueError, csv.Error, requests.RequestException) as exc:
+                record_source_error(
+                    logger,
+                    progress,
+                    FULL_SPEC.key,
+                    day,
+                    exc,
+                    url=FULL_SPEC.url(day),
+                    cache_path=source_cache_path(FULL_SPEC, day),
+                )
+
+        market_activity_output = day_output_paths.get(MARKET_ACTIVITY_SPEC.key) or output_market_activity_path(out_dir, day)
+        if day >= MARKET_ACTIVITY_SPEC.start_date and should_process_source(
+            MARKET_ACTIVITY_SPEC.key, day, market_activity_output
+        ):
+            try:
+                market_activity_payload = fetch_source_bytes(source_client, MARKET_ACTIVITY_SPEC, day)
+                if market_activity_payload:
+                    market_activity_output.parent.mkdir(parents=True, exist_ok=True)
+                    market_activity_output.write_bytes(market_activity_payload)
+                    progress["totals"]["market_activity_days_written"] += 1
+                mark_source_processed(
+                    MARKET_ACTIVITY_SPEC.key,
+                    day,
+                    market_activity_output,
+                    1 if market_activity_payload else 0,
+                )
+            except (OSError, ValueError, csv.Error, requests.RequestException) as exc:
+                record_source_error(
+                    logger,
+                    progress,
+                    MARKET_ACTIVITY_SPEC.key,
+                    day,
+                    exc,
+                    url=MARKET_ACTIVITY_SPEC.url(day),
+                    cache_path=source_cache_path(MARKET_ACTIVITY_SPEC, day),
+                )
 
         progress["updated_at"] = datetime.now().isoformat()
         progress["days_processed"] = index

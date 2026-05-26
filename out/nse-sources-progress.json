@@ -1,9 +1,9 @@
 {
-  "status": "running",
-  "started_at": "2026-05-24T22:25:18.572935",
-  "updated_at": "2026-05-24T23:08:07.830200",
+  "status": "completed",
+  "started_at": "2026-05-25T18:21:29.942499",
+  "updated_at": "2026-05-25T20:30:44.070641",
   "requested_start_date": "2008-01-01",
-  "requested_end_date": "2026-05-24",
+  "requested_end_date": "2026-05-25",
   "symbols": [
     "ABB",
     "ADANIPORTS",
@@ -28,14 +28,16 @@
     "SUZLON",
     "TRENT"
   ],
-  "days_processed": 2392,
-  "days_total": 4799,
-  "last_processed_day": "2017-03-01",
+  "days_processed": 4800,
+  "days_total": 4800,
+  "last_processed_day": "2026-05-25",
   "totals": {
-    "bhavcopy_rows": 11171,
-    "delivery_days_written": 725,
-    "volatility_days_written": 725,
-    "full_days_written": 0,
-    "market_activity_days_written": 725
-  }
+    "bhavcopy_rows": 18890,
+    "delivery_days_written": 932,
+    "volatility_days_written": 932,
+    "full_days_written": 978,
+    "market_activity_days_written": 932
+  },
+  "errors_count": 0,
+  "recent_errors": []
 }

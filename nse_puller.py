@@ -32,6 +32,7 @@ DEFAULT_HEADERS = {
 }
 DEFAULT_START_DATE = date(2008, 1, 1)
 CACHE_DIR = PROJECT_DIR / ".cache" / "bhavcopy"
+STATUS_CACHE_DIR = PROJECT_DIR / ".cache" / "bhavcopy-status"
 OUTPUT_FIELDS = [
     "symbol",
     "series",
@@ -108,6 +109,10 @@ class NSEArchiveClient:
         if cache_path.exists():
             return cache_path.read_bytes()
 
+        cached_status = self.load_cached_status(day)
+        if cached_status and cached_status.get("status") == "missing":
+            return None
+
         for url_group in build_archive_url_groups(day):
             saw_missing = False
             last_response: requests.Response | None = None
@@ -118,6 +123,16 @@ class NSEArchiveClient:
                 if response.status_code == 200:
                     cache_path.parent.mkdir(parents=True, exist_ok=True)
                     cache_path.write_bytes(response.content)
+                    self.write_cached_status(
+                        day,
+                        {
+                            "status": "downloaded",
+                            "url": url,
+                            "cache_path": str(cache_path),
+                            "bytes": len(response.content),
+                            "checked_at": datetime.now().isoformat(),
+                        },
+                    )
                     return response.content
                 if response.status_code == 404:
                     saw_missing = True
@@ -131,6 +146,14 @@ class NSEArchiveClient:
             if last_response is not None:
                 last_response.raise_for_status()
 
+        self.write_cached_status(
+            day,
+            {
+                "status": "missing",
+                "checked_at": datetime.now().isoformat(),
+                "urls": [url for url_group in build_archive_url_groups(day) for url in url_group],
+            },
+        )
         return None
 
     def request_url(self, url: str) -> requests.Response:
@@ -164,6 +187,20 @@ class NSEArchiveClient:
         month = day.strftime("%b").upper()
         filename = f"cm{day.strftime('%d%b%Y').upper()}bhav.csv.zip"
         return self.cache_dir / f"{day:%Y}" / month / filename
+
+    def status_cache_path(self, day: date) -> Path:
+        return STATUS_CACHE_DIR / f"{day.isoformat()}.json"
+
+    def load_cached_status(self, day: date) -> dict | None:
+        cache_path = self.status_cache_path(day)
+        if not cache_path.exists():
+            return None
+        return json.loads(cache_path.read_text(encoding="utf-8"))
+
+    def write_cached_status(self, day: date, payload: dict) -> None:
+        cache_path = self.status_cache_path(day)
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
 class RateLimiter:

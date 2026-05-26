@@ -13,6 +13,7 @@ dependencies = [
 [project.scripts]
 nse-puller = "nse_puller:run"
 bse-puller = "bse_puller:run"
+nse-market-puller = "nse_market_puller:run"
 nse-stock-picker = "nse_stock_picker:run"
 nse-sentiment = "nse_sentiment:run"
 
@@ -21,4 +22,4 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-py-modules = ["nse_puller", "bse_puller", "nse_stock_picker", "nse_sentiment"]
+py-modules = ["nse_puller", "bse_puller", "nse_market_puller", "nse_stock_picker", "nse_sentiment"]
