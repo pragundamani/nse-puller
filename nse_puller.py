@@ -492,14 +492,72 @@ def read_last_saved_date(csv_path: Path) -> date | None:
     return date.fromisoformat(last_value)
 
 
-def append_symbol_rows(csv_path: Path, rows: list[dict]) -> None:
+def load_saved_dates(csv_path: Path) -> set[str]:
+    if not csv_path.exists():
+        return set()
+
+    saved_dates: set[str] = set()
+    with csv_path.open("r", newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            row_date = row.get("date", "")
+            if row_date:
+                saved_dates.add(row_date)
+    return saved_dates
+
+
+def deduplicate_symbol_file(csv_path: Path) -> int:
+    if not csv_path.exists():
+        return 0
+
+    deduplicated_rows: list[dict[str, str]] = []
+    seen_dates: set[str] = set()
+    removed_rows = 0
+
+    with csv_path.open("r", newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            row_date = row.get("date", "")
+            if row_date and row_date in seen_dates:
+                removed_rows += 1
+                continue
+            if row_date:
+                seen_dates.add(row_date)
+            deduplicated_rows.append(row)
+
+    if removed_rows == 0:
+        return 0
+
+    with csv_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=OUTPUT_FIELDS)
+        writer.writeheader()
+        writer.writerows(deduplicated_rows)
+
+    return removed_rows
+
+
+def append_symbol_rows(csv_path: Path, rows: list[dict], saved_dates: set[str]) -> int:
     csv_path.parent.mkdir(parents=True, exist_ok=True)
     file_exists = csv_path.exists()
+    fresh_rows: list[dict] = []
+    for row in rows:
+        row_date = row.get("date", "")
+        if row_date and row_date in saved_dates:
+            continue
+        if row_date:
+            saved_dates.add(row_date)
+        fresh_rows.append(row)
+
+    if not fresh_rows:
+        return 0
+
     with csv_path.open("a", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=OUTPUT_FIELDS)
         if not file_exists:
             writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows(fresh_rows)
+
+    return len(fresh_rows)
 
 
 def write_progress(progress_path: Path, payload: dict) -> None:
@@ -524,9 +582,16 @@ def update_symbol_files(
     stocks_dir.mkdir(parents=True, exist_ok=True)
 
     symbol_start_dates: dict[str, date] = {}
+    symbol_saved_dates: dict[str, set[str]] = {}
     for symbol in symbols:
+        csv_path = symbol_output_path(out_dir, symbol)
+        removed_rows = deduplicate_symbol_file(csv_path)
+        if removed_rows:
+            logger.info(f"{symbol}: removed {removed_rows} duplicate rows from existing output")
+
+        symbol_saved_dates[symbol] = load_saved_dates(csv_path)
         effective_start = start_date
-        last_saved = read_last_saved_date(symbol_output_path(out_dir, symbol)) if resume else None
+        last_saved = read_last_saved_date(csv_path) if resume else None
 
         if last_saved is not None:
             candidate_start = last_saved + timedelta(days=1)
@@ -599,9 +664,13 @@ def update_symbol_files(
             rows_by_symbol.setdefault(row["symbol"], []).append(row)
 
         for symbol, rows in rows_by_symbol.items():
-            append_symbol_rows(symbol_output_path(out_dir, symbol), rows)
-            progress["symbol_rows_written"][symbol] += len(rows)
-            rows_written += len(rows)
+            written_rows = append_symbol_rows(
+                symbol_output_path(out_dir, symbol),
+                rows,
+                symbol_saved_dates.setdefault(symbol, set()),
+            )
+            progress["symbol_rows_written"][symbol] += written_rows
+            rows_written += written_rows
 
         progress["updated_at"] = datetime.now().isoformat()
         progress["days_processed"] = index

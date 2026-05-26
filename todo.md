@@ -1,13 +1,13 @@
 # Data sources
-- [ ] bhavcopy high low volume
-- [ ] securities delivery position
-- [ ] market activity report
-- [ ] daily volatility
-- [ ] full bhavcopy and security deliverable data 
+- [x] bhavcopy high low volume
+- [x] securities delivery position
+- [x] market activity report
+- [x] daily volatility
+- [x] full bhavcopy and security deliverable data 
 
 # Params
-- [ ] ema7 > ema14
-- [ ] rsi14>50
+- [x] ema7 > ema14
+- [x] rsi14>50
 - [ ] stoploss 6
 - [ ] target profit 11
 - [ ] trailing stoploss 4
@@ -19,14 +19,13 @@
  - [ ] exponential moving average
   - [ ] double or triple crossovers
   - [ ] adaptive moving average with volatility
-- [ ] market momentum $M=V-V^x$ where V is closing price and V^x is closing price x days ago
+- [x] market momentum $M=V-V^x$ where V is closing price and V^x is closing price x days ago
 - [ ] Relative strength Index
-- [ ] Stochastics KD 
-- [ ] Larry Williams %R
-- [ ] MACD
-- [ ] ADX
+- [x] Stochastics KD 
+- [x] Larry Williams %R
+- [x] MACD
+- [x] ADX
 - [ ] VVAP
-- [ ] 
 
 ## Calculate
 - [ ] Cyclic waves
@@ -34,7 +33,7 @@
 
 # NOTE
 ## General
-- Bollinger bands targets
+- [x] Bollinger bands targets
 ## Futures
 - sudden decline in open interest warns of a change in trend
 - very high open interest can intensify downward pressure
