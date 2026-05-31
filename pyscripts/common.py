@@ -9,6 +9,7 @@ import pandas as pd
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_SYMBOLS_FILE = PROJECT_DIR / "stocks.txt"
 DEFAULT_STOCKS_DIR = PROJECT_DIR / "out" / "stocks"
+DEFAULT_OPTION_CHAIN_DIR = PROJECT_DIR / "out" / "option-chain"
 
 
 def load_symbols(symbols_file: Path = DEFAULT_SYMBOLS_FILE) -> set[str]:
@@ -103,3 +104,35 @@ def calculate_wilder_atr_series(df: pd.DataFrame, day_count: int) -> pd.Series:
     atr = pd.concat([pd.Series([float("nan")]), atr], ignore_index=True)
     atr.index = df.index
     return atr
+
+
+def load_option_chain_data(
+    underlying: str,
+    as_of_date: str,
+    option_chain_dir: Path = DEFAULT_OPTION_CHAIN_DIR,
+) -> tuple[str, pd.DataFrame, pd.Timestamp]:
+    normalized_underlying = underlying.strip().upper()
+    option_file = option_chain_dir / f"{normalized_underlying}.csv"
+    if not option_file.exists():
+        raise FileNotFoundError(f"Option-chain data file not found: {option_file}")
+
+    df = pd.read_csv(option_file)
+    if df.empty:
+        raise ValueError(f"No option-chain rows found in {option_file}")
+
+    df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d", errors="raise")
+    for column in ["total_call_oi", "total_put_oi", "put_call_ratio", "underlying_value", "contract_rows"]:
+        if column in df.columns:
+            df[column] = pd.to_numeric(df[column], errors="coerce")
+
+    required_columns = ["total_call_oi", "total_put_oi", "put_call_ratio"]
+    for column in required_columns:
+        if column not in df.columns:
+            raise ValueError(f"Missing {column} in {option_file}")
+        if df[column].isna().any():
+            raise ValueError(f"Invalid {column} values found in {option_file}")
+
+    df = df.sort_values("date").reset_index(drop=True)
+    resolved_date = resolve_as_of_date(df["date"], as_of_date)
+    df = df[df["date"] <= resolved_date].copy().reset_index(drop=True)
+    return normalized_underlying, df, resolved_date

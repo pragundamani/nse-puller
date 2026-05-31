@@ -1,9 +1,9 @@
 {
   "status": "completed",
-  "started_at": "2026-05-25T15:24:29.007321",
-  "updated_at": "2026-05-25T15:35:46.660862",
+  "started_at": "2026-05-27T05:36:43.324117",
+  "updated_at": "2026-05-27T05:48:25.520405",
   "requested_start_date": "2016-12-08",
-  "requested_end_date": "2026-05-25",
+  "requested_end_date": "2026-05-27",
   "symbols": [
     "ABB",
     "ADANIPORTS",
@@ -76,9 +76,9 @@
     "SUZLON": "2024-07-25",
     "TRENT": "2024-07-25"
   },
-  "days_processed": 2468,
-  "days_total": 2468,
-  "last_processed_day": "2026-05-25",
+  "days_processed": 2470,
+  "days_total": 2470,
+  "last_processed_day": "2026-05-27",
   "rows_written": 0,
   "symbol_rows_written": {
     "ABB": 0,

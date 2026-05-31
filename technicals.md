@@ -32,8 +32,8 @@ Done means the indicator or signal is already implemented in the repo, mostly un
 - [x] Market breadth
 
 ## F&O / Positioning
-- [ ] OI change
-- [ ] PCR
+- [x] OI change
+- [x] PCR
 - [ ] IV
 - [ ] Max pain
 - [ ] Long buildup / short buildup

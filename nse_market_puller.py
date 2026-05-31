@@ -14,7 +14,6 @@ import requests
 
 from nse_puller import (
     DEFAULT_OUT_DIR,
-    DEFAULT_SYMBOLS_FILE,
     PROJECT_DIR,
     RunLogger,
     iter_weekdays,
@@ -24,7 +23,6 @@ from nse_puller import (
     resolve_symbols_file,
     write_progress,
 )
-
 
 DEFAULT_START_DATE = date(2008, 1, 1)
 CACHE_DIR = PROJECT_DIR / ".cache" / "nse-market-features"
@@ -108,7 +106,7 @@ class RateLimiter:
 
 
 class NSEMarketClient:
-    def __init__(self, timeout: int = 30, requests_per_second: float = 5.0) -> None:
+    def __init__(self, timeout: int = 30, requests_per_second: float = 0.0) -> None:
         self.timeout = timeout
         self.rate_limiter = RateLimiter(requests_per_second)
         self.session = requests.Session()
@@ -120,7 +118,9 @@ class NSEMarketClient:
         last_error: requests.RequestException | None = None
         for url in PRIME_URLS:
             try:
-                response = self.session.get(url, headers=HTML_HEADERS, timeout=self.timeout)
+                response = self.session.get(
+                    url, headers=HTML_HEADERS, timeout=self.timeout
+                )
                 response.raise_for_status()
                 self._primed = True
                 return
@@ -136,7 +136,7 @@ class NSEMarketClient:
         headers = dict(JSON_HEADERS)
         headers["Referer"] = referer
 
-        for attempt in range(4):
+        for attempt in range(8):
             self.rate_limiter.wait()
             try:
                 response = self.session.get(url, headers=headers, timeout=self.timeout)
@@ -158,30 +158,53 @@ class NSEMarketClient:
         if last_error is not None:
             raise last_error
         assert last_response is not None
+        
+        # If we got here with a rate-limit or server error after retries, raise it
+        import sys
+        print(f"Warning: API returned {last_response.status_code} after {attempt + 1} attempts", file=sys.stderr)
         last_response.raise_for_status()
-        return []
+        # Fallback: if raise_for_status() didn't raise (e.g., 2xx response with empty body)
+        try:
+            return last_response.json()
+        except ValueError:
+            # JSON parsing failed, return empty dict
+            return {}
 
-    def fetch_announcements(self, symbol: str, start_date: date, end_date: date) -> list[dict]:
+    def fetch_announcements(
+        self, symbol: str, start_date: date, end_date: date
+    ) -> list[dict]:
         url = (
             f"{NSE_BASE_URL}/api/corporate-announcements?index=equities"
             f"&from_date={start_date:%d-%m-%Y}&to_date={end_date:%d-%m-%Y}&symbol={symbol}"
         )
-        return self.request_json(url, f"{NSE_BASE_URL}/companies-listing/corporate-filings-announcements")
+        return self.request_json(
+            url, f"{NSE_BASE_URL}/companies-listing/corporate-filings-announcements"
+        )
 
-    def fetch_actions(self, symbol: str, start_date: date, end_date: date) -> list[dict]:
+    def fetch_actions(
+        self, symbol: str, start_date: date, end_date: date
+    ) -> list[dict]:
         url = (
             f"{NSE_BASE_URL}/api/corporates-corporateActions?index=equities"
             f"&from_date={start_date:%d-%m-%Y}&to_date={end_date:%d-%m-%Y}&symbol={symbol}"
         )
-        return self.request_json(url, f"{NSE_BASE_URL}/companies-listing/corporate-filings-actions")
+        return self.request_json(
+            url, f"{NSE_BASE_URL}/companies-listing/corporate-filings-actions"
+        )
 
     def fetch_option_chain(self, symbol: str, is_index: bool) -> dict:
         if is_index:
             url = f"{NSE_BASE_URL}/api/option-chain-v3?type=Indices&symbol={symbol}&expiry=latest"
         else:
             url = f"{NSE_BASE_URL}/api/option-chain-v3?type=Equity&symbol={symbol}&expiry=latest"
-        payload = self.request_json(url, f"{NSE_BASE_URL}/option-chain")
-        return payload if isinstance(payload, dict) else {}
+        try:
+            payload = self.request_json(url, f"{NSE_BASE_URL}/option-chain")
+            return payload if isinstance(payload, dict) else {}
+        except requests.RequestException as exc:
+            # Log the error for debugging
+            import sys
+            print(f"Warning: Failed to fetch option chain for {symbol}: {exc}", file=sys.stderr)
+            return {}
 
 
 def status_cache_path(domain: str, identifier: str) -> Path:
@@ -275,7 +298,9 @@ def normalize_announcement_row(raw_row: dict) -> dict:
     announcement_date = ""
     if timestamp:
         try:
-            announcement_date = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S").date().isoformat()
+            announcement_date = (
+                datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S").date().isoformat()
+            )
         except ValueError:
             announcement_date = normalize_timestamp(timestamp)
     return {
@@ -311,7 +336,12 @@ def normalize_action_row(raw_row: dict) -> dict:
     }
 
 
-def summarize_option_chain(payload: dict, symbol: str, is_index: bool, snapshot_date: date) -> list[dict]:
+def summarize_option_chain(
+    payload: dict, symbol: str, is_index: bool, snapshot_date: date
+) -> list[dict]:
+    if not payload:
+        return []
+    
     records = payload.get("records")
     if not isinstance(records, dict):
         return []
@@ -327,8 +357,12 @@ def summarize_option_chain(payload: dict, symbol: str, is_index: bool, snapshot_
         underlying_float = None
 
     expiry_dates = records.get("expiryDates")
-    selected_expiry = expiry_dates[0] if isinstance(expiry_dates, list) and expiry_dates else ""
-    filtered_rows = [row for row in data_rows if row.get("expiryDate") == selected_expiry] or data_rows
+    selected_expiry = (
+        expiry_dates[0] if isinstance(expiry_dates, list) and expiry_dates else ""
+    )
+    filtered_rows = [
+        row for row in data_rows if row.get("expiryDate") == selected_expiry
+    ] or data_rows
 
     total_call_oi = 0.0
     total_put_oi = 0.0
@@ -361,7 +395,9 @@ def summarize_option_chain(payload: dict, symbol: str, is_index: bool, snapshot_
         {
             "symbol": symbol,
             "date": snapshot_date.isoformat(),
-            "timestamp": str(records.get("timestamp") or payload.get("serverTime") or "").strip(),
+            "timestamp": str(
+                records.get("timestamp") or payload.get("serverTime") or ""
+            ).strip(),
             "is_index": "1" if is_index else "0",
             "expiry": str(selected_expiry).strip(),
             "underlying_value": str(underlying_value or "").strip(),
@@ -399,7 +435,9 @@ def option_cache_path(symbol: str, snapshot_date: date) -> Path:
     return CACHE_DIR / "option-chain" / symbol / f"{snapshot_date.isoformat()}.json"
 
 
-def iter_option_underlyings(symbols: list[str], include_indices: bool, option_indices: list[str]) -> list[tuple[str, bool]]:
+def iter_option_underlyings(
+    symbols: list[str], include_indices: bool, option_indices: list[str]
+) -> list[tuple[str, bool]]:
     underlyings = [(symbol, False) for symbol in symbols]
     if include_indices:
         underlyings.extend((index_name.upper(), True) for index_name in option_indices)
@@ -426,12 +464,16 @@ def update_announcements(
     for symbol in symbols:
         effective_start = start_date
         if resume:
-            last_saved = read_last_saved_date(announcement_output_path(out_dir, symbol), "announcement_date")
+            last_saved = read_last_saved_date(
+                announcement_output_path(out_dir, symbol), "announcement_date"
+            )
             if last_saved is not None:
                 candidate_start = last_saved + timedelta(days=1)
                 if candidate_start > effective_start:
                     effective_start = candidate_start
-                logger.info(f"{symbol}: announcements resume after {last_saved.isoformat()}")
+                logger.info(
+                    f"{symbol}: announcements resume after {last_saved.isoformat()}"
+                )
         if effective_start <= end_date:
             symbol_start_dates[symbol] = effective_start
         else:
@@ -456,7 +498,12 @@ def update_announcements(
         return 0
 
     processing_days = list(iter_weekdays(min(symbol_start_dates.values()), end_date))
-    total_units = sum(1 for day in processing_days for symbol in symbol_start_dates if symbol_start_dates[symbol] <= day)
+    total_units = sum(
+        1
+        for day in processing_days
+        for symbol in symbol_start_dates
+        if symbol_start_dates[symbol] <= day
+    )
 
     progress = {
         "status": "running",
@@ -466,7 +513,10 @@ def update_announcements(
         "requested_end_date": end_date.isoformat(),
         "symbols": symbols,
         "active_symbols": sorted(symbol_start_dates),
-        "symbol_start_dates": {symbol: symbol_start_dates[symbol].isoformat() for symbol in sorted(symbol_start_dates)},
+        "symbol_start_dates": {
+            symbol: symbol_start_dates[symbol].isoformat()
+            for symbol in sorted(symbol_start_dates)
+        },
         "days_total": len(processing_days),
         "units_total": total_units,
         "units_processed": 0,
@@ -479,7 +529,11 @@ def update_announcements(
     rows_written = 0
     processed_units = 0
     for day_index, day in enumerate(processing_days, start=1):
-        active_symbols = [symbol for symbol, symbol_start in symbol_start_dates.items() if symbol_start <= day]
+        active_symbols = [
+            symbol
+            for symbol, symbol_start in symbol_start_dates.items()
+            if symbol_start <= day
+        ]
         for symbol in active_symbols:
             status_id = day_status_id(symbol, day)
             if resume:
@@ -525,8 +579,14 @@ def update_announcements(
             progress["updated_at"] = datetime.now().isoformat()
 
         write_progress(progress_path, progress)
-        if day_index == 1 or day_index == len(processing_days) or day_index % log_every == 0:
-            logger.info(f"Announcements: processed {day_index}/{len(processing_days)} trading days through {day.isoformat()}")
+        if (
+            day_index == 1
+            or day_index == len(processing_days)
+            or day_index % log_every == 0
+        ):
+            logger.info(
+                f"Announcements: processed {day_index}/{len(processing_days)} trading days through {day.isoformat()}"
+            )
 
     progress["status"] = "completed"
     progress["updated_at"] = datetime.now().isoformat()
@@ -551,7 +611,9 @@ def update_actions(
     for symbol in symbols:
         effective_start = start_date
         if resume:
-            last_saved = read_last_saved_date(action_output_path(out_dir, symbol), "ex_date")
+            last_saved = read_last_saved_date(
+                action_output_path(out_dir, symbol), "ex_date"
+            )
             if last_saved is not None:
                 candidate_start = last_saved + timedelta(days=1)
                 if candidate_start > effective_start:
@@ -581,7 +643,12 @@ def update_actions(
         return 0
 
     processing_days = list(iter_weekdays(min(symbol_start_dates.values()), end_date))
-    total_units = sum(1 for day in processing_days for symbol in symbol_start_dates if symbol_start_dates[symbol] <= day)
+    total_units = sum(
+        1
+        for day in processing_days
+        for symbol in symbol_start_dates
+        if symbol_start_dates[symbol] <= day
+    )
 
     progress = {
         "status": "running",
@@ -591,7 +658,10 @@ def update_actions(
         "requested_end_date": end_date.isoformat(),
         "symbols": symbols,
         "active_symbols": sorted(symbol_start_dates),
-        "symbol_start_dates": {symbol: symbol_start_dates[symbol].isoformat() for symbol in sorted(symbol_start_dates)},
+        "symbol_start_dates": {
+            symbol: symbol_start_dates[symbol].isoformat()
+            for symbol in sorted(symbol_start_dates)
+        },
         "days_total": len(processing_days),
         "units_total": total_units,
         "units_processed": 0,
@@ -604,7 +674,11 @@ def update_actions(
     rows_written = 0
     processed_units = 0
     for day_index, day in enumerate(processing_days, start=1):
-        active_symbols = [symbol for symbol, symbol_start in symbol_start_dates.items() if symbol_start <= day]
+        active_symbols = [
+            symbol
+            for symbol, symbol_start in symbol_start_dates.items()
+            if symbol_start <= day
+        ]
         for symbol in active_symbols:
             status_id = day_status_id(symbol, day)
             if resume:
@@ -650,8 +724,14 @@ def update_actions(
             progress["updated_at"] = datetime.now().isoformat()
 
         write_progress(progress_path, progress)
-        if day_index == 1 or day_index == len(processing_days) or day_index % log_every == 0:
-            logger.info(f"Actions: processed {day_index}/{len(processing_days)} trading days through {day.isoformat()}")
+        if (
+            day_index == 1
+            or day_index == len(processing_days)
+            or day_index % log_every == 0
+        ):
+            logger.info(
+                f"Actions: processed {day_index}/{len(processing_days)} trading days through {day.isoformat()}"
+            )
 
     progress["status"] = "completed"
     progress["updated_at"] = datetime.now().isoformat()
@@ -676,12 +756,16 @@ def update_option_chain(
     for symbol, is_index in underlyings:
         effective_start = start_date
         if resume:
-            last_saved = read_last_saved_date(option_output_path(out_dir, symbol), "date")
+            last_saved = read_last_saved_date(
+                option_output_path(out_dir, symbol), "date"
+            )
             if last_saved is not None:
                 candidate_start = last_saved + timedelta(days=1)
                 if candidate_start > effective_start:
                     effective_start = candidate_start
-                logger.info(f"{symbol}: option snapshots resume after {last_saved.isoformat()}")
+                logger.info(
+                    f"{symbol}: option snapshots resume after {last_saved.isoformat()}"
+                )
         if effective_start <= end_date:
             active_underlyings.append((symbol, is_index, effective_start))
         else:
@@ -705,8 +789,18 @@ def update_option_chain(
         logger.info("All option snapshots are already up to date")
         return 0
 
-    processing_days = list(iter_weekdays(min(effective_start for _, _, effective_start in active_underlyings), end_date))
-    total_units = sum(1 for day in processing_days for _, _, effective_start in active_underlyings if effective_start <= day)
+    processing_days = list(
+        iter_weekdays(
+            min(effective_start for _, _, effective_start in active_underlyings),
+            end_date,
+        )
+    )
+    total_units = sum(
+        1
+        for day in processing_days
+        for _, _, effective_start in active_underlyings
+        if effective_start <= day
+    )
 
     progress = {
         "status": "running",
@@ -720,7 +814,10 @@ def update_option_chain(
         "last_processed_day": None,
         "underlyings": [symbol for symbol, _ in underlyings],
         "active_underlyings": [symbol for symbol, _, _ in active_underlyings],
-        "underlying_start_dates": {symbol: effective_start.isoformat() for symbol, _, effective_start in active_underlyings},
+        "underlying_start_dates": {
+            symbol: effective_start.isoformat()
+            for symbol, _, effective_start in active_underlyings
+        },
         "rows_written": 0,
         "symbol_rows_written": {symbol: 0 for symbol, _, _ in active_underlyings},
     }
@@ -748,6 +845,12 @@ def update_option_chain(
             cache_path = option_cache_path(symbol, snapshot_date)
             payload = client.fetch_option_chain(symbol, is_index)
             cache_payload(cache_path, payload)
+            
+            if not payload:
+                logger.info(
+                    f"{symbol}: empty payload received (may indicate API failure or no options available)"
+                )
+            
             rows = summarize_option_chain(payload, symbol, is_index, snapshot_date)
             added = merge_rows(
                 option_output_path(out_dir, symbol),
@@ -779,8 +882,14 @@ def update_option_chain(
             progress["updated_at"] = datetime.now().isoformat()
 
         write_progress(progress_path, progress)
-        if day_index == 1 or day_index == len(processing_days) or day_index % log_every == 0:
-            logger.info(f"Option chain: processed {day_index}/{len(processing_days)} trading days through {snapshot_date.isoformat()}")
+        if (
+            day_index == 1
+            or day_index == len(processing_days)
+            or day_index % log_every == 0
+        ):
+            logger.info(
+                f"Option chain: processed {day_index}/{len(processing_days)} trading days through {snapshot_date.isoformat()}"
+            )
 
     progress["status"] = "completed"
     progress["updated_at"] = datetime.now().isoformat()
@@ -805,7 +914,9 @@ def render_table(rows: list[dict], columns: list[tuple[str, str]]) -> str:
     return "\n".join([header, divider, *body])
 
 
-def write_domain_output(rows: list[dict], fieldnames: list[str], output_format: str, output_path: str | None) -> None:
+def write_domain_output(
+    rows: list[dict], fieldnames: list[str], output_format: str, output_path: str | None
+) -> None:
     if output_format == "json":
         content = json.dumps(rows, indent=2)
         if output_path:
@@ -826,7 +937,10 @@ def write_domain_output(rows: list[dict], fieldnames: list[str], output_format: 
             writer.writerows(rows)
         return
 
-    columns = [(fieldname, fieldname.upper()) for fieldname in fieldnames[: min(len(fieldnames), 7)]]
+    columns = [
+        (fieldname, fieldname.upper())
+        for fieldname in fieldnames[: min(len(fieldnames), 7)]
+    ]
     content = render_table(rows, columns)
     if output_path:
         Path(output_path).write_text(content + "\n", encoding="utf-8")
@@ -879,8 +993,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--requests-per-second",
         type=float,
-        default=5.0,
-        help="Global request throttle across all requests (default: 5.0)",
+        default=0.0,
+        help="Global request throttle across all requests (default: 0 = unlimited)",
     )
     parser.add_argument(
         "--format",
@@ -929,18 +1043,35 @@ def load_option_indices(value: str) -> list[str]:
     return indices
 
 
-def run_combined_mode(client: NSEMarketClient, args: argparse.Namespace, symbols: list[str]) -> int:
+def run_combined_mode(
+    client: NSEMarketClient, args: argparse.Namespace, symbols: list[str]
+) -> int:
     if args.domain == "all":
         raise RuntimeError("--output requires selecting a single --domain")
 
     if args.domain == "announcements":
         rows: list[dict] = []
         for symbol in symbols:
-            rows.extend(normalize_announcement_row(row) for row in client.fetch_announcements(symbol, args.start_date, args.end_date))
+            rows.extend(
+                normalize_announcement_row(row)
+                for row in client.fetch_announcements(
+                    symbol, args.start_date, args.end_date
+                )
+            )
         rows = [row for row in rows if row["announcement_date"]]
-        rows.sort(key=lambda row: (row["symbol"], row["announcement_date"], row["announcement_timestamp"], row["sequence_id"]))
+        rows.sort(
+            key=lambda row: (
+                row["symbol"],
+                row["announcement_date"],
+                row["announcement_timestamp"],
+                row["sequence_id"],
+            )
+        )
         if not rows:
-            print("No announcement rows found for the requested symbols and date range.", file=sys.stderr)
+            print(
+                "No announcement rows found for the requested symbols and date range.",
+                file=sys.stderr,
+            )
             return 1
         write_domain_output(rows, ANNOUNCEMENT_FIELDS, args.format, args.output)
         return 0
@@ -948,22 +1079,39 @@ def run_combined_mode(client: NSEMarketClient, args: argparse.Namespace, symbols
     if args.domain == "actions":
         rows = []
         for symbol in symbols:
-            rows.extend(normalize_action_row(row) for row in client.fetch_actions(symbol, args.start_date, args.end_date))
+            rows.extend(
+                normalize_action_row(row)
+                for row in client.fetch_actions(symbol, args.start_date, args.end_date)
+            )
         rows = [row for row in rows if row["ex_date"]]
-        rows.sort(key=lambda row: (row["symbol"], row["ex_date"], row["record_date"], row["subject"]))
+        rows.sort(
+            key=lambda row: (
+                row["symbol"],
+                row["ex_date"],
+                row["record_date"],
+                row["subject"],
+            )
+        )
         if not rows:
-            print("No corporate action rows found for the requested symbols and date range.", file=sys.stderr)
+            print(
+                "No corporate action rows found for the requested symbols and date range.",
+                file=sys.stderr,
+            )
             return 1
         write_domain_output(rows, ACTION_FIELDS, args.format, args.output)
         return 0
 
     rows = []
-    for symbol, is_index in iter_option_underlyings(symbols, args.include_indices, load_option_indices(args.option_indices)):
+    for symbol, is_index in iter_option_underlyings(
+        symbols, args.include_indices, load_option_indices(args.option_indices)
+    ):
         payload = client.fetch_option_chain(symbol, is_index)
         rows.extend(summarize_option_chain(payload, symbol, is_index, args.end_date))
     rows.sort(key=lambda row: (row["symbol"], row["date"], row["expiry"]))
     if not rows:
-        print("No option-chain rows found for the requested underlyings.", file=sys.stderr)
+        print(
+            "No option-chain rows found for the requested underlyings.", file=sys.stderr
+        )
         return 1
     write_domain_output(rows, OPTION_FIELDS, args.format, args.output)
     return 0
@@ -990,7 +1138,9 @@ def run() -> int:
     if args.log_every < 1:
         parser.error("--log-every must be at least 1")
 
-    client = NSEMarketClient(timeout=args.timeout, requests_per_second=args.requests_per_second)
+    client = NSEMarketClient(
+        timeout=args.timeout, requests_per_second=args.requests_per_second
+    )
 
     if args.output:
         try:
@@ -1007,13 +1157,33 @@ def run() -> int:
 
     try:
         if args.domain in {"all", "announcements"}:
-            update_announcements(client, symbols, args.start_date, args.end_date, out_dir, args.resume, args.log_every)
+            update_announcements(
+                client,
+                symbols,
+                args.start_date,
+                args.end_date,
+                out_dir,
+                args.resume,
+                args.log_every,
+            )
         if args.domain in {"all", "actions"}:
-            update_actions(client, symbols, args.start_date, args.end_date, out_dir, args.resume, args.log_every)
+            update_actions(
+                client,
+                symbols,
+                args.start_date,
+                args.end_date,
+                out_dir,
+                args.resume,
+                args.log_every,
+            )
         if args.domain in {"all", "options"}:
             update_option_chain(
                 client,
-                iter_option_underlyings(symbols, args.include_indices, load_option_indices(args.option_indices)),
+                iter_option_underlyings(
+                    symbols,
+                    args.include_indices,
+                    load_option_indices(args.option_indices),
+                ),
                 args.start_date,
                 args.end_date,
                 out_dir,

@@ -8,6 +8,7 @@ dependencies = [
   "requests>=2.32.0",
   "torch>=2.3.0",
   "transformers>=4.41.0",
+  "nsepython>=0.1.0",
 ]
 
 [project.scripts]
@@ -16,10 +17,11 @@ bse-puller = "bse_puller:run"
 nse-market-puller = "nse_market_puller:run"
 nse-stock-picker = "nse_stock_picker:run"
 nse-sentiment = "nse_sentiment:run"
+nse-fundamentals-puller = "nse_fundamentals_puller:run"
 
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-py-modules = ["nse_puller", "bse_puller", "nse_market_puller", "nse_stock_picker", "nse_sentiment"]
+py-modules = ["nse_puller", "bse_puller", "nse_market_puller", "nse_stock_picker", "nse_sentiment", "nse_fundamentals_puller"]

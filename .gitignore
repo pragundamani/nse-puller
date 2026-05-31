@@ -6,3 +6,4 @@ __pycache__/
 nse_puller.egg-info/
 
 .kite.env
+.indianapi.key
